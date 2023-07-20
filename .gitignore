@@ -1,0 +1,7 @@
+# Ignore everything in this directory
+logs/
+datasets/
+
+# Except this file
+!.gitignore
+

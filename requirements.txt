@@ -1,0 +1,9 @@
+numpy
+pandas
+torch==2.0.0
+torch_optimizer
+torchvision==0.15.1
+scikit-learn
+matplotlib
+Flask
+thread6

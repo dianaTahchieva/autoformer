@@ -1,0 +1,80 @@
+image: docker.curix.ai:5000/curix/docker/base-images/python-base/full/3.5.1
+
+variables:
+  DOCKER_HOST: tcp://gitrunner1.curix.ai:2376
+  IMAGE_MASTER: $CI_REGISTRY_IMAGE:latest
+  IMAGE_PROD: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+  
+cache:
+  key: "$CI_COMMIT_REF_NAME"
+  paths:
+    - build
+    - .gradle
+  untracked: true
+
+stages:
+  # - precheck
+  - build
+  #- test
+  #- sonarqube
+  - deploy    
+
+
+# Test Phase
+#test:
+#  stage: test 
+#  script:
+#    - echo "======================================================"
+#    - echo " -->  Running tests"
+#    - pip3 install -r requirements.txt
+#    - apt-get update && apt-get install -y $(cat ubuntu_req.txt)
+#    - cp config.sample config
+#    - echo "Starting ranker_app"
+#    - python3 predictor_app.py &
+#    - sleep 5
+#    - echo "Starting client_test"
+#    - python3 RESTful/client_test.py
+  #coverage: *TOTAL.*\s+(\d+%)$*
+
+# Deploy phase
+deploy_staging:
+  image: docker.curix.ai:5000/curix/docker/base-images/docker-latest:latest
+  stage: deploy
+  script:
+    - echo "Create image $IMAGE_MASTER"
+    - docker login -u $CI_REGISTRY_USER -p $CI_BUILD_TOKEN $CI_REGISTRY
+    - ls -al
+    - docker build -t $IMAGE_MASTER .
+    - docker push $IMAGE_MASTER
+    - docker logout $CI_REGISTRY
+  only:
+    - master
+  tags:
+    # GitLab runner tag
+    - dockerbuilder
+
+# Deploy pahse
+deploy_production:
+  image: docker.curix.ai:5000/curix/docker/base-images/docker-latest:latest
+  stage: deploy
+  script:
+    - echo "Create image $IMAGE_PROD"
+    - ls -al
+    - docker login -u $CI_REGISTRY_USER -p $CI_BUILD_TOKEN $CI_REGISTRY
+    - docker build -t $IMAGE_PROD .
+    - docker push $IMAGE_PROD
+    - docker logout $CI_REGISTRY
+  only:
+    - tags
+  tags:
+    # GitLab runner tag
+    - dockerbuilder
+
+#sonarqube:
+#  image: sonarsource/sonar-scanner-cli:latest 
+#  stage: sonarqube
+#  variables: 
+#    #SONAR_TOKEN: $SONAR_AUTH_TOKEN 
+#    GIT_DEPTH: "0" # Tells git to fetch all the branches of the project, required by the analysis task 
+#  script: 
+#    - sonar-scanner -X -Dsonar.login=${SONAR_AUTH_TOKEN}

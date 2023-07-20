@@ -1,0 +1,100 @@
+[model]
+#options: [Autoformer, Informer, Transformer]
+model_name = Autoformer 
+
+[data_loader]
+#data_root_path = C:/Users/diana.tahchieva/eclipse-workspace_/AutoformerNN/datasets/ETT/ETDataset/ETT-small/
+data_root_path = ./datasets/
+#data_filename = ETTh1.csv
+data_filename = Self_Healing_RD_1.csv
+#data_filename = Uli_Stack.csv
+#forecasting task, options:[M, S, MS]; M:multivariate predict multivariate, S:univariate predict univariate, MS:multivariate predict univariate
+features = M 
+#target feature in S or MS task
+target = OT 
+#scale the data using values from training set
+scaler_on = True
+#freq for time features encoding, options:[s:secondly, t:minutely, h:hourly, d:daily, b:business days, w:weekly, m:monthly], you can also use more detailed freq like 15min or 3h
+freq = t 
+#location of model checkpoints
+checkpoints_path = ./logs/ 
+min_numb_unique_points = 10
+min_numb_convex_hull = 10
+#options: "std", "convex hull"
+filter_strategy = std
+min_std_value = 1.0
+
+
+[forecasting_task]
+training_set_size_percent = 0.8 
+validation_set_size_percent = 0.1
+test_set_size_percent = 0.1
+#input sequence length
+seq_len = 64 
+# label_len + pred_len = number that is power of 2, e.g. 1,2,4,8,16,32,64,128
+#start token length
+label_len = 31 
+#prediction sequence length
+pred_len = 1 
+
+[model_define]
+#encoder input size
+enc_in = 7
+#decoder input size
+dec_in = 7 
+#output size
+c_out = 7 
+#dimension of model
+d_model = 512 
+#num of heads
+n_heads = 8 
+#num of encoder layers
+e_layers = 2 
+#num of decoder layers
+d_layers = 1 
+#dimension of fcn
+d_ff = 2048 
+#window size of moving average
+moving_avg = 25 
+#attn factor
+factor = 3 
+#whether to use distilling in encoder, using this argument means not using distilling (default=True)
+distil = store_false 
+dropout = 0.05 
+#time features encoding, options:[timeF, fixed, learned]
+embed = timeF 
+activation = gelu 
+#whether to output attention in encoder
+output_attention = True 
+#whether to predict unseen future data
+do_predict = store_true 
+
+
+[optimization]
+#data loader num workers
+num_workers = 1
+train_epochs = 1000 
+#batch size of train input data
+batch_size = 32 
+#early stopping patience
+patience = 3 
+#optimizer learning rate
+learning_rate = 0.0001 
+#exp description
+des = Exp 
+#loss function
+loss = mse 
+#adjust learning rate
+lradj = type1 
+#use automatic mixed precision training (default=False)
+use_amp = store_true 
+
+[mogodb]
+database_name: curixCoreDb 
+dbHost: 10.103.10.120
+dbPort: 7000
+dbUsername: curix
+dbPassword: persistence2022
+
+[debug]
+plot_timeseries = False
