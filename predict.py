@@ -53,7 +53,7 @@ class Predict(object):
                 outputs = outputs[:, -self.args["pred_len"]:, f_dim:]
                 batch_y = batch_y[:, -self.args["pred_len"]:, f_dim:].to(self.device)
                 
-                print("outputs.shape",outputs.shape)
+                #print("outputs.shape",outputs.shape)
                 
                 pred = outputs.detach().cpu().numpy()
                 true = batch_y.detach().cpu().numpy()
@@ -70,12 +70,14 @@ class Predict(object):
                 total_loss.append(loss)
         total_loss = np.average(total_loss)
         
+        print('results shape:', np.shape(results), np.shape(targets))
+        
         results = np.concatenate(results, axis=0)
         targets = np.concatenate(targets, axis=0)
-        print('test shape:', results.shape, targets.shape)
+        print('results shape concat:', results.shape, targets.shape)
         results = results.reshape(-1, results.shape[-2], results.shape[-1])
         targets = targets.reshape(-1, targets.shape[-2], targets.shape[-1])
-        print('test shape:', results.shape, targets.shape)
+        print('results shape reshape:', results.shape, targets.shape)
         return total_loss, np.array(results), np.array(targets)
         
        

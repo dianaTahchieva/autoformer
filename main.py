@@ -89,24 +89,27 @@ def plot_features(n, timeseries):
     plt.show()
     
     
-def plot_results(n, results, targets):
+def plot_results(n, results, targets, m):
     
     max_width = 2 ##images per row
     height, width = n//max_width +1, max_width
     fig, axs = plt.subplots(height, width, sharex=True)
     
+    print("n" , n)
     for i in range(n):
         ax = axs.flat[i]
-        print("std", np.std(results))           
-        ax.plot(results[:,0,i], "o-", c= "k", markersize=0.5, label=str(i) + " predict")
-        ax.plot(targets[:,0,i], "o-", c= "r", markersize=0.5, label=str(i) + " target")
+        print("std", np.std(results))  
+        ax.plot(results[m:,-1,i], "o-", c= "k", markersize=0.5, label=str(i) + " predict")
+        ax.plot(targets[m:,-1,i], "o-", c= "r", markersize=0.5, label=str(i) + " target")
+        
+        print("mean test error", np.mean(results[:,:,i] - targets[:,:,i]))  
      ## access each axes object via axs.flat
     for ax in axs.flat:
         ## check if something was plotted 
         if not bool(ax.has_data()):
             fig.delaxes(ax) ## delete if nothing is plotted in the axes obj
-
-    plt.legend("best")
+    
+    plt.legend()
     plt.show()
 
 def start_trainin():
@@ -154,16 +157,15 @@ def start_trainin():
     predict = Predict(model, args, device)
     error, results, targets = predict.make_prediction(valid_loader)
     
-
-    plot_results(n, results, targets)
-    """
-    results = np.reshape(results, (results.shape[0]*results.shape[1], results.shape[2]))
-    targets = np.reshape(targets, (targets.shape[0]*targets.shape[1], targets.shape[2]))
-    print(results.shape)
-    """
-    #print("mean test error",predict.make_prediction(test_loader))
+    np.save(path +"results.npy", results)
+    np.save(path +"targets.npy", targets)
+    results = np.load(path + "results.npy")
+    targets = np.load(path + "targets.npy")
     
+    print("results", results.shape)
     
+    m = 1000 # last m points to plot [m:, -1; i]
+    plot_results(n, results, targets, m)
     
     resp = jsonify({})
     resp.status_code = 200
